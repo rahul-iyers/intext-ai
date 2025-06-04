@@ -1,3 +1,19 @@
+// Add fadeInOut animation to page if not already present
+if (!document.getElementById("fadeInOut-style")) {
+  const style = document.createElement("style");
+  style.id = "fadeInOut-style";
+  style.textContent = `
+    @keyframes fadeInOut {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+    .thinking-animation {
+      animation: fadeInOut 1.5s ease-in-out infinite;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 function showQueryDialog(selection, context, x, y) {
   const oldDialog = document.getElementById("intext-ai-query-box");
   if (oldDialog) oldDialog.remove();
@@ -156,7 +172,12 @@ function showResponse(text, x, y) {
 
   // Content
   const content = document.createElement("div");
-  content.innerText = text;
+  content.innerText = text === "Loading..." ? "Thinking" : text;
+  if (text === "Loading...") {
+    content.classList.add("thinking-animation");
+  } else {
+    content.classList.remove("thinking-animation");
+  }
   content.style.padding = "10px";
   content.style.whiteSpace = "pre-wrap";
   content.style.flex = "1";
@@ -200,9 +221,12 @@ function showResponse(text, x, y) {
 
 function updateResponseContent(container, newText) {
   if (container && container._contentDiv) {
-    container._contentDiv.innerText = newText;
-    container._contentDiv.style.display = "block";
+    const content = container._contentDiv;
+    content.innerText = newText;
+    content.classList.remove("thinking-animation");
+    content.style.display = "block";
     container.style.height = "200px";
+
     const minimizeBtn = container.querySelector("button");
     if (minimizeBtn) minimizeBtn.innerText = "—";
   }
