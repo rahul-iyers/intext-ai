@@ -1,3 +1,77 @@
+function showQueryDialog(selection, context, x, y) {
+  // Avoid duplicates
+  const oldDialog = document.getElementById("context-ai-query-box");
+  if (oldDialog) oldDialog.remove();
+
+  const dialog = document.createElement("div");
+  dialog.id = "context-ai-query-box";
+  dialog.style.position = "fixed";
+  dialog.style.top = "20px";
+  dialog.style.right = "20px";
+  dialog.style.background = "#fff";
+  dialog.style.padding = "16px";
+  dialog.style.borderRadius = "10px";
+  dialog.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
+  dialog.style.zIndex = 10002;
+  dialog.style.width = "300px";
+  dialog.style.fontFamily = "sans-serif";
+
+  const title = document.createElement("div");
+  title.innerText = "Ask Context AI";
+  title.style.fontSize = "16px";
+  title.style.fontWeight = "bold";
+  title.style.marginBottom = "8px";
+
+  const closeBtn = document.createElement("button");
+  closeBtn.innerText = "✕";
+  closeBtn.style.position = "absolute";
+  closeBtn.style.top = "8px";
+  closeBtn.style.right = "8px";
+  closeBtn.style.border = "none";
+  closeBtn.style.background = "transparent";
+  closeBtn.style.cursor = "pointer";
+  closeBtn.onclick = () => dialog.remove();
+
+  const textarea = document.createElement("textarea");
+  textarea.placeholder = "Type your question...";
+  textarea.style.width = "100%";
+  textarea.style.height = "80px";
+  textarea.style.padding = "6px";
+  textarea.style.marginTop = "4px";
+  textarea.style.fontSize = "14px";
+  textarea.style.border = "1px solid #ccc";
+  textarea.style.borderRadius = "6px";
+  textarea.style.resize = "none";
+
+  const submitBtn = document.createElement("button");
+  submitBtn.innerText = "Submit";
+  submitBtn.style.marginTop = "10px";
+  submitBtn.style.padding = "8px 12px";
+  submitBtn.style.background = "#222";
+  submitBtn.style.color = "#fff";
+  submitBtn.style.border = "none";
+  submitBtn.style.borderRadius = "6px";
+  submitBtn.style.cursor = "pointer";
+
+  submitBtn.onclick = async () => {
+    const question = textarea.value.trim();
+    if (!question) return;
+
+    dialog.innerHTML = "<em>Thinking...</em>";
+
+    const answer = await fetchAIResponse(question, context, selection);
+    dialog.remove();
+    showResponse(answer, x, y + 40);
+  };
+
+  dialog.appendChild(closeBtn);
+  dialog.appendChild(title);
+  dialog.appendChild(textarea);
+  dialog.appendChild(submitBtn);
+  document.body.appendChild(dialog);
+}
+
+
 function injectButton(text, x, y) {
   const existing = document.getElementById("intext-ai-button");
   if (existing) existing.remove();
@@ -19,32 +93,8 @@ function injectButton(text, x, y) {
   document.body.appendChild(btn);
 
   btn.onclick = async () => {
-    const question = prompt("Ask a question based on your selection:");
-    if (!question) return;
-
-    const intext = document.body.innerText.slice(0, 4000);
-
-    const loadingDiv = document.createElement("div");
-    loadingDiv.innerText = "Thinking...";
-    loadingDiv.id = "intext-ai-loading";
-    loadingDiv.style.position = "absolute";
-    loadingDiv.style.top = `${y + 40}px`;
-    loadingDiv.style.left = `${x + 10}px`;
-    loadingDiv.style.background = "#f4f4f4";
-    loadingDiv.style.padding = "8px";
-    loadingDiv.style.borderRadius = "6px";
-    loadingDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
-    loadingDiv.style.zIndex = 10001;
-    loadingDiv.style.fontFamily = "sans-serif";
-    document.body.appendChild(loadingDiv);
-
-    btn.disabled = true;
-    btn.innerText = "Loading...";
-
-    const answer = await fetchAIResponse(question, intext, text);
-    loadingDiv.remove();
-    showResponse(answer, x, y + 40);
-    btn.remove();
+    const context = document.body.innerText.slice(0, 4000);
+    showQueryDialog(text, context, x, y);
   };
 }
 
