@@ -1,9 +1,9 @@
 function showQueryDialog(selection, context, x, y) {
-  const oldDialog = document.getElementById("context-ai-query-box");
+  const oldDialog = document.getElementById("intext-ai-query-box");
   if (oldDialog) oldDialog.remove();
 
   const dialog = document.createElement("div");
-  dialog.id = "context-ai-query-box";
+  dialog.id = "intext-ai-query-box";
   dialog.style.position = "fixed";
   dialog.style.top = "20px";
   dialog.style.right = "20px";
@@ -24,7 +24,7 @@ function showQueryDialog(selection, context, x, y) {
   header.style.marginBottom = "8px";
 
   const title = document.createElement("div");
-  title.innerText = "Ask Context AI";
+  title.innerText = "Ask Intext AI";
   title.style.fontSize = "16px";
   title.style.fontWeight = "bold";
 
