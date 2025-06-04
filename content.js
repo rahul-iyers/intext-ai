@@ -158,14 +158,42 @@ async function fetchAIResponse(question, intext, selection) {
   return data.choices?.[0]?.message?.content || "No response";
 }
 
+let suppressClick = false;
+
 document.addEventListener("mouseup", (e) => {
-  const selection = window.getSelection().toString().trim();
+  setTimeout(() => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString().trim();
 
-  // 🛑 Ignore clicks on the button itself
-  if (e.target.id === "intext-ai-button") return;
+    if (!selectedText) return;
 
-  if (selection.length > 0) {
-    injectButton(selection, e.pageX, e.pageY);
+    try {
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+
+      if (!rect || (rect.width === 0 && rect.height === 0)) return;
+
+      const x = rect.right + window.scrollX;
+      const y = rect.bottom + window.scrollY;
+
+      suppressClick = true;
+      injectButton(selectedText, x, y);
+    } catch (err) {
+      // no-op
+    }
+  }, 10);
+});
+
+document.addEventListener("click", (e) => {
+  if (suppressClick) {
+    suppressClick = false;
+    return;
   }
+
+  const btn = document.getElementById("intext-ai-button");
+  const dialog = document.getElementById("intext-ai-query-box");
+
+  if (btn && !btn.contains(e.target)) btn.remove();
+  if (dialog && !dialog.contains(e.target)) dialog.remove();
 });
 
