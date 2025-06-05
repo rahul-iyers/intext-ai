@@ -26,6 +26,7 @@ function showQueryDialog(selection, context, x, y) {
   dialog.style.background = "#fff";
   dialog.style.padding = "16px";
   dialog.style.borderRadius = "10px";
+  // dialog.style.border = "3px solid #ccc";
   dialog.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
   dialog.style.zIndex = 10002;
   dialog.style.width = "300px";
@@ -40,8 +41,9 @@ function showQueryDialog(selection, context, x, y) {
   header.style.marginBottom = "8px";
 
   const title = document.createElement("div");
-  title.innerText = "Ask Intext AI";
-  title.style.fontSize = "16px";
+  title.innerText = "Intext AI";
+  title.style.fontStyle = 'italic';
+  title.style.fontSize = "20px";
   title.style.fontWeight = "bold";
 
   const closeBtn = document.createElement("button");
@@ -67,7 +69,7 @@ function showQueryDialog(selection, context, x, y) {
 
   // Submit button
   const submitBtn = document.createElement("button");
-  submitBtn.innerText = "Submit";
+  submitBtn.innerText = "Ask";
   submitBtn.style.marginTop = "10px";
   submitBtn.style.padding = "8px 12px";
   submitBtn.style.background = "#222";
