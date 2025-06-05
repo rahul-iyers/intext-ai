@@ -51,7 +51,11 @@ function showQueryDialog(selection, context, x, y) {
   closeBtn.style.border = "none";
   closeBtn.style.background = "transparent";
   closeBtn.style.cursor = "pointer";
-  closeBtn.onclick = () => dialog.remove();
+  closeBtn.onclick = () => {
+    dialog.remove();
+    createFloatingIcon(() => showQueryDialog(selection, context, x, y));
+  };
+
 
   header.appendChild(title);
   header.appendChild(closeBtn);
@@ -116,6 +120,56 @@ function showQueryDialog(selection, context, x, y) {
     isDragging = false;
     document.body.style.userSelect = "auto";
   });
+}
+
+function createFloatingIcon(reopenCallback) {
+  // Check if already exists
+  if (document.getElementById("intext-floating-icon")) return;
+
+  const icon = document.createElement("div");
+  icon.id = "intext-floating-icon";
+  icon.style.position = "fixed";
+  icon.style.top = "20px";
+  icon.style.right = "20px";
+  icon.style.zIndex = 10000;
+  icon.style.background = "#222";
+  icon.style.color = "#fff";
+  icon.style.padding = "8px 12px";
+  icon.style.borderRadius = "20px";
+  icon.style.display = "flex";
+  icon.style.alignItems = "center";
+  icon.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
+  icon.style.fontFamily = "sans-serif";
+  icon.style.cursor = "pointer";
+
+  const label = document.createElement("span");
+  label.innerText = "💬 Intext AI";
+  label.style.marginRight = "8px";
+  label.style.userSelect = "none";
+
+  const closeBtn = document.createElement("button");
+  closeBtn.innerText = "✕";
+  closeBtn.style.border = "none";
+  closeBtn.style.background = "transparent";
+  closeBtn.style.color = "#fff";
+  closeBtn.style.fontSize = "14px";
+  closeBtn.style.cursor = "pointer";
+
+  // Reopen dialog
+  icon.onclick = () => {
+    reopenCallback();
+    icon.remove();
+  };
+
+  // Stop propagation for close button
+  closeBtn.onclick = (e) => {
+    e.stopPropagation();
+    icon.remove(); // fully remove
+  };
+
+  icon.appendChild(label);
+  icon.appendChild(closeBtn);
+  document.body.appendChild(icon);
 }
 
 function showResponse(text, x, y) {
