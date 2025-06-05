@@ -183,8 +183,70 @@ function showResponse(text, x, y) {
   content.style.padding = "10px";
   content.style.whiteSpace = "pre-wrap";
   content.style.flex = "1";
+  content.style.overflowY = "auto";
   container._contentDiv = content;
   container.appendChild(content);
+
+  const followUpContainer = document.createElement("div");
+  followUpContainer.style.display = "flex";
+  followUpContainer.style.borderTop = "1px solid #ddd";
+  followUpContainer.style.padding = "8px";
+
+  const followUpInput = document.createElement("input");
+  followUpInput.type = "text";
+  followUpInput.placeholder = "Ask a follow-up...";
+  followUpInput.style.flex = "1";
+  followUpInput.style.padding = "6px";
+  followUpInput.style.border = "1px solid #ccc";
+  followUpInput.style.borderRadius = "4px";
+  followUpInput.style.marginRight = "6px";
+
+  const sendBtn = document.createElement("button");
+  sendBtn.innerText = "Send";
+  sendBtn.style.padding = "6px 10px";
+  sendBtn.style.border = "none";
+  sendBtn.style.background = "#222";
+  sendBtn.style.color = "#fff";
+  sendBtn.style.borderRadius = "4px";
+  sendBtn.style.cursor = "pointer";
+
+  const initialMessages = [
+    {
+      role: "system",
+      content:
+        "You're an assistant that helps users by answering questions based on the full intext of a webpage. Use both the highlighted selection and surrounding page text to form intelligent answers."
+    },
+    {
+      role: "user",
+      content: `Webpage content:\n${document.body.innerText.slice(0, 4000)}\n\nUser's highlighted selection: "${text}"\n\nQuestion: ${text}`
+    }
+  ];
+
+
+  sendBtn.onclick = async () => {
+    const newQuestion = followUpInput.value.trim();
+    if (!newQuestion) return;
+
+    const messages = container._chatMessages || [...initialMessages];
+    messages.push({ role: "user", content: newQuestion });
+    content.innerText += `\n\nYou: ${newQuestion}\nIntext AI: Thinking...`;
+    followUpInput.value = "";
+    content.scrollTop = content.scrollHeight;
+
+    try {
+      const answer = await fetchFollowUpResponse(messages);
+      messages.push({ role: "assistant", content: answer });
+      content.innerText += `\n\nIntext AI: ${answer}`;
+      content.scrollTop = content.scrollHeight;
+      container._chatMessages = messages;
+    } catch (e) {
+      content.innerText += "\n\nIntext AI: Error fetching response.";
+    }
+  };
+
+  followUpContainer.appendChild(followUpInput);
+  followUpContainer.appendChild(sendBtn);
+  container.appendChild(followUpContainer);
 
   document.body.appendChild(container);
 
@@ -232,6 +294,23 @@ function updateResponseContent(container, newText) {
     const minimizeBtn = container.querySelector("button");
     if (minimizeBtn) minimizeBtn.innerText = "—";
   }
+}
+
+async function fetchFollowUpResponse(messages) {
+  const apiKey = OPENAI_API_KEY;
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "gpt-4o",
+      messages: messages
+    })
+  });
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || "No response.";
 }
 
 // injecting button near the selection
